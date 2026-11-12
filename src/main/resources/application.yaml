@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: product-service
+              uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/products/**,/api/v1/categories/**
+
+            - id: company-service
+              uri: ${COMPANY_SERVICE_URL:http://localhost:8084}
+              predicates:
+                - Path=/api/v1/companies/**
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,gateway
