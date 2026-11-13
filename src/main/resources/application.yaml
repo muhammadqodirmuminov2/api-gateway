@@ -5,16 +5,47 @@ spring:
     gateway:
       server:
         webflux:
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+                allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
+                allowed-headers: Authorization,Content-Type,X-Company-Id,X-Correlation-Id
+                exposed-headers: X-Correlation-Id,Location
+                allow-credentials: true
+                max-age: 3600
+
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@ipKeyResolver}"
+
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 5s
+
           routes:
             - id: product-service
               uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/v1/products/**,/api/v1/categories/**
+              metadata:
+                response-timeout: 30000
 
             - id: company-service
               uri: ${COMPANY_SERVICE_URL:http://localhost:8084}
               predicates:
                 - Path=/api/v1/companies/**
+              metadata:
+                response-timeout: 30000
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 server:
   port: 8081

@@ -1,0 +1,13 @@
+name: api-gateway
+
+services:
+  gateway-redis:
+    image: redis:8
+    container_name: gateway-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
