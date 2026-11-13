@@ -1,4 +1,9 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/businesshub}
   application:
     name: api-gateway
   cloud:
@@ -22,7 +27,7 @@ spring:
                 redis-rate-limiter.replenishRate: 5
                 redis-rate-limiter.burstCapacity: 10
                 redis-rate-limiter.requestedTokens: 1
-                key-resolver: "#{@ipKeyResolver}"
+                key-resolver: "#{@userKeyResolver}"
 
           httpclient:
             connect-timeout: 2000
@@ -58,3 +63,6 @@ management:
   endpoint:
     gateway:
       access: unrestricted
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
