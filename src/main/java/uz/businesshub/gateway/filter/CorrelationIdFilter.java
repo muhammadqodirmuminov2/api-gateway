@@ -2,26 +2,28 @@ package uz.businesshub.gateway.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 import java.util.regex.Pattern;
 
 @Component
-public class CorrelationIdFilter implements GlobalFilter, Ordered {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CorrelationIdFilter implements WebFilter {
 
     public static final String HEADER = "X-Correlation-Id";
     private static final Pattern VALID = Pattern.compile("[A-Za-z0-9-]{1,64}");
     private static final Logger log = LoggerFactory.getLogger(CorrelationIdFilter.class);
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String incoming = exchange.getRequest().getHeaders().getFirst(HEADER);
         String correlationId = (incoming != null && VALID.matcher(incoming).matches())
                 ? incoming
@@ -40,10 +42,5 @@ public class CorrelationIdFilter implements GlobalFilter, Ordered {
                         exchange.getResponse().getStatusCode(),
                         (System.nanoTime() - start) / 1_000_000,
                         correlationId));
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 }
