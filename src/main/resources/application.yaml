@@ -47,6 +47,11 @@ spring:
                 - Path=/api/v1/companies/**
               metadata:
                 response-timeout: 30000
+
+            - id: inventory-service
+              uri: ${INVENTORY_SERVICE_URL:http://localhost:8086}
+              predicates:
+                - Path=/api/v1/stock/**
   data:
     redis:
       host: ${REDIS_HOST:localhost}
